@@ -16,7 +16,8 @@ def main(args):
             jumpover = 1 - (y // step) % 2 if lev > 0 else 0
             for x in range(step * jumpover, size + 1, step * (1 + jumpover)):
                 pointer = 1 - (x // step) % 2 + 2 * jumpover if lev > 0 else 3
-                yref, xref = step * (1 - pointer // 2), step * (1 - pointer % 2)
+                yref, xref = step * \
+                    (1 - pointer // 2), step * (1 - pointer % 2)
                 corner1 = height[y - yref, x - xref]
                 corner2 = height[y + yref, x + xref]
                 average = (corner1 + corner2) / 2.0
@@ -25,15 +26,30 @@ def main(args):
 
     xg, yg = np.mgrid[-1:1:1j*size, -1:1:1j*size]
     surf = mlab.surf(xg, yg, height, colormap=args.colormap, warp_scale='auto')
+
+    delayer = 500
+
+    @mlab.animate(delay=delayer)
+    def anim(frames):
+        for i in range(frames):
+            surf.mlab_source.scalars = np.asarray(height*1/frames*(i+1), 'f')
+            # surf.mlab_source.set(x=xg, y=yg, height=height*(i+1)/frames)
+            yield
+
+    frames = 10
+
+    anim(frames)
     mlab.show()
+
 
 if __name__ == '__main__':
     parser = ArgumentParser()
-    parser.add_argument('--levels', type=int, default=11, help='number of levels to use in generation < 15')
-    parser.add_argument('--seed', type=int, default=None, help='numpy random seed for generation')
-    parser.add_argument('--colormap', type=str, default='gist_earth', help='color map to apply to meshgrid eg. copper, bone, hot...')
+    parser.add_argument('--levels', type=int, default=10,
+                        help='number of levels to use in generation < 15')
+    parser.add_argument('--seed', type=int, default=None,
+                        help='numpy random seed for generation')
+    parser.add_argument('--colormap', type=str, default='gist_earth',
+                        help='color map to apply to meshgrid eg. copper, bone, hot...')
     args = parser.parse_args()
 
     main(args)
-
-
