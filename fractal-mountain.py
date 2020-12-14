@@ -7,8 +7,7 @@ def main(args):
     size = 2 ** (args.levels - 1)
     height = np.zeros((size + 1, size + 1))
 
-    if args.seed is not None:
-        np.random.seed(args.seed)
+    np.random.seed(args.seed)
 
     for lev in range(args.levels):
         step = size // 2 ** lev
@@ -27,29 +26,24 @@ def main(args):
     xg, yg = np.mgrid[-1:1:1j*size, -1:1:1j*size]
     surf = mlab.surf(xg, yg, height, colormap=args.colormap, warp_scale='auto')
 
-    delayer = 500
-
-    @mlab.animate(delay=delayer)
+    @mlab.animate(delay=args.delay)
     def anim(frames):
         for i in range(frames):
             surf.mlab_source.scalars = np.asarray(height*1/frames*(i+1), 'f')
-            # surf.mlab_source.set(x=xg, y=yg, height=height*(i+1)/frames)
             yield
 
-    frames = 10
-
-    anim(frames)
+    anim(args.frames)
     mlab.show()
 
 
 if __name__ == '__main__':
     parser = ArgumentParser()
-    parser.add_argument('--levels', type=int, default=10,
-                        help='number of levels to use in generation < 15')
-    parser.add_argument('--seed', type=int, default=None,
-                        help='numpy random seed for generation')
-    parser.add_argument('--colormap', type=str, default='gist_earth',
-                        help='color map to apply to meshgrid eg. copper, bone, hot...')
+    parser.add_argument('--levels', type=int, default=10, help='number of levels to use in generation < 15')
+    parser.add_argument('--seed', type=int, default=None, help='numpy random seed for generation')
+    parser.add_argument('--colormap', type=str, default='gist_earth', help='color map to apply to meshgrid {copper, bone, hot...}')
+    parser.add_argument('--frames', type=int, default=10, help='number of frames to animate') # stops rendering at with high frame count
+    parser.add_argument('--delay', type=int, default=250, help='delay between rendered frames')
+
     args = parser.parse_args()
 
     main(args)
